@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import NotificationBell from "../components/NotificationBell";
 
 function OrganizerDashboard() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [createdEvents, setCreatedEvents] = useState([]);
   const [allEvents, setAllEvents] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
 
   const token = localStorage.getItem("token");
 
@@ -63,10 +67,10 @@ function OrganizerDashboard() {
 
   return (
     <div className="flex h-screen bg-gray-900 text-white">
-      {/* Left Sidebar */}
       <div className="w-64 bg-gray-800 flex flex-col justify-between p-6">
         <div className="flex flex-col gap-6">
           <h2 className="text-2xl font-bold mb-4">Organizer</h2>
+          <NotificationBell />
           <button
             onClick={() => navigate("/organizer")}
             className="hover:text-blue-400 transition"
@@ -88,7 +92,6 @@ function OrganizerDashboard() {
         </button>
       </div>
 
-      {/* Center Feed */}
       <div className="flex-1 flex flex-col">
         <div className="p-4 bg-gray-900 sticky top-0 z-10 flex justify-center">
           <input
@@ -135,7 +138,6 @@ function OrganizerDashboard() {
         </div>
       </div>
 
-      {/* Right Sidebar - Created Events */}
       <div className="w-64 bg-gray-800 p-6 overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">My Created Events</h2>
         {createdEvents.length === 0 ? (

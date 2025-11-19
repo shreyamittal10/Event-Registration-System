@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import NotificationBell from "../components/NotificationBell";
+import ChatWindow from "../components/ChatWindow";
 
 function StudentDashboard() {
   const navigate = useNavigate();
@@ -8,6 +10,9 @@ function StudentDashboard() {
   const [registeredEvents, setRegisteredEvents] = useState([]);
   const [activeTab, setActiveTab] = useState("home");
   const [student, setStudent] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [activeChat, setActiveChat] = useState(null);
 
   const token = localStorage.getItem("token");
 
@@ -15,6 +20,7 @@ function StudentDashboard() {
     fetchAllEvents();
     fetchRegisteredEvents();
     fetchStudentInfo();
+    fetchNotifications();
   }, []);
 
   const fetchAllEvents = async () => {
@@ -48,6 +54,28 @@ function StudentDashboard() {
     }
   };
 
+  const getGoogleCalendarUrl = (event) => {
+    const date = event.event_date.replace(/-/g, "");
+  
+    const time = event.event_time
+      ? event.event_time.replace(/:/g, "").slice(0, 6)
+      : "120000"; 
+    const start = `${date}T${time}`;
+  
+    const hour = parseInt(time.slice(0, 2));
+    const minsSecs = time.slice(2); 
+  
+    const endHour = String(Math.min(hour + 1, 23)).padStart(2, "0");
+    const end = `${date}T${endHour}${minsSecs}`;
+  
+    const title = encodeURIComponent(event.title);
+    const location = encodeURIComponent(event.venue || "");
+    const details = encodeURIComponent("Added from Event Management System");
+  
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&location=${location}&details=${details}`;
+  };
+  
+
   const fetchStudentInfo = async () => {
     try {
       const res = await fetch("http://localhost:5000/api/users/me", {
@@ -59,6 +87,22 @@ function StudentDashboard() {
     } catch (err) {
       console.error(err);
       alert("Error fetching profile: " + err.message);
+    }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/notifications", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.msg || "Failed to fetch notifications");
+
+      setNotifications(data.notifications || []);
+      setUnreadCount((data.notifications || []).filter(n => !n.is_read).length);
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
     }
   };
 
@@ -76,11 +120,41 @@ function StudentDashboard() {
       if (!res.ok) throw new Error(data.msg || "Failed to register");
       alert("Registered successfully!");
       fetchRegisteredEvents();
+      if (fetchNotifications) fetchNotifications();
     } catch (err) {
       console.error(err);
       alert("Error: " + err.message);
     }
   };
+
+  const downloadTicket = async (eventId) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/events/${eventId}/ticket`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (!res.ok) {
+        throw new Error("Failed to download ticket");
+      }
+  
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+  
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ticket_event_${eventId}.pdf`;
+      a.click();
+  
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Error downloading ticket");
+    }
+  };
+  
 
   const handleLogout = () => {
     localStorage.clear();
@@ -96,10 +170,14 @@ function StudentDashboard() {
 
   return (
     <div className="flex h-screen bg-gray-900 text-white">
-      {/* Left Sidebar */}
       <div className="w-64 bg-gray-800 flex flex-col justify-between p-6">
         <div className="flex flex-col gap-6">
           <h2 className="text-2xl font-bold mb-4">Student</h2>
+          <NotificationBell
+            notifications={notifications}
+            unreadCount={unreadCount}
+            fetchNotifications={fetchNotifications}
+          />
           <button
             onClick={() => setActiveTab("home")}
             className="hover:text-blue-400 transition"
@@ -112,6 +190,7 @@ function StudentDashboard() {
           >
             Profile
           </button>
+          
         </div>
         <button
           onClick={handleLogout}
@@ -121,7 +200,6 @@ function StudentDashboard() {
         </button>
       </div>
 
-      {/* Center Content */}
       <div className="flex-1 flex flex-col">
         {activeTab === "home" && (
           <>
@@ -239,6 +317,30 @@ function StudentDashboard() {
                     })
                   : "N/A"}
               </p>
+              <button
+  onClick={() => downloadTicket(event.id)}
+  className="mt-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-sm rounded"
+>
+  🎫 Download Ticket
+</button>
+<a
+  href={getGoogleCalendarUrl(event)}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <button className="mt-2 px-3 py-1 bg-yellow-500 hover:bg-yellow-600 text-sm rounded">
+    📅 Add to Google Calendar
+  </button>
+</a>
+<button
+  onClick={() => setActiveChat({ eventId: event.id, otherUserId: event.organizer_id, otherName: event.organizer_name })}
+  className="mt-2 px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-sm rounded"
+>
+  💬 Chat with organizer
+</button>
+
+
+
             </div>
           </div>
         ))}
@@ -249,7 +351,20 @@ function StudentDashboard() {
 
       </div>
 
-      {/* Right Sidebar only on Home */}
+      {activeChat && (
+  <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex justify-center items-center z-50">
+    <div className="bg-gray-800 w-[450px] h-[600px] rounded-xl shadow-lg p-4">
+      <ChatWindow
+        eventId={activeChat.eventId}
+        otherUserId={activeChat.otherUserId}
+        otherName={activeChat.otherName}
+        currentUserId={Number(student?.id)}
+        onClose={() => setActiveChat(null)}
+      />
+    </div>
+  </div>
+)}
+
       {activeTab === "home" && (
         <div className="w-64 bg-gray-800 p-6 overflow-y-auto">
           <h2 className="text-xl font-bold mb-4">My Registered Events</h2>
@@ -274,6 +389,13 @@ function StudentDashboard() {
                   </p>
                   <p className="text-sm text-gray-300">⏰ {event.event_time || "N/A"}</p>
                   <p className="text-sm text-gray-300">📍 {event.venue || "N/A"}</p>
+                  <button
+  onClick={() => downloadTicket(event.id)}
+  className="mt-2 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-sm rounded"
+>
+  🎫 Download Ticket
+</button>
+
                 </div>
               ))}
             </div>
