@@ -36,7 +36,6 @@ function AuthModal({ isOpen, setIsOpen }) {
       : "http://localhost:5000/api/auth/login";
   
     try {
-      // -------- OTP-aware payload --------
       const payload = !isSignup
         ? otpStep
           ? { email: formData.email, password: formData.password, otp }
@@ -53,13 +52,11 @@ function AuthModal({ isOpen, setIsOpen }) {
   
       if (!response.ok) throw new Error(data.msg || "Something went wrong");
   
-      // -------- OTP step handling --------
       if (!isSignup && data.step === "OTP_REQUIRED") {
         setOtpStep(true);
-        return; // stop here, wait for OTP input
+        return; 
       }
-  
-      // -------- Final login success --------
+
       if (!isSignup) {
         if (data.token) localStorage.setItem("token", data.token);
   
@@ -73,7 +70,7 @@ function AuthModal({ isOpen, setIsOpen }) {
   
         console.log(`Logged in as ${role}`);
       } 
-      // -------- Signup success --------
+      
       else {
         setSuccess("Signup successful! Please log in now.");
         setIsSignup(false);
