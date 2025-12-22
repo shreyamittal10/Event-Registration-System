@@ -23,6 +23,7 @@ import { getMyProfile } from "./controllers/userController.js";
 import { getNotifications, markAsRead } from "./controllers/notificationController.js";
 import { downloadTicket } from "./controllers/ticketController.js";
 import { getChats, getMessages } from "./controllers/chatController.js";
+import { generateEventDescription } from "./controllers/aiController.js";
 
 const { Pool } = pkg;
 const app = express();
@@ -41,6 +42,12 @@ app.post("/api/auth/login", login);
 app.get("/api/protected", verifyToken, (req, res) => {
   res.json({ msg: `Hello ${req.user.role}, you are authorized!` });
 });
+
+app.post(
+  "/api/ai/event-description",
+  verifyToken,
+  generateEventDescription
+);
 
 app.post("/api/events/create", verifyToken, createEvent);
 app.get("/api/events/created", verifyToken, getCreatedEvents);

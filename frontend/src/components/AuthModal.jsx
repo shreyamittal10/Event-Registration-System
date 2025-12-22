@@ -11,6 +11,8 @@ function AuthModal({ isOpen, setIsOpen }) {
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpStep, setOtpStep] = useState(false);
 
   const navigate = useNavigate();
 
@@ -27,43 +29,62 @@ function AuthModal({ isOpen, setIsOpen }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
+    setSuccess("");
+  
     const url = isSignup
       ? "http://localhost:5000/api/auth/register"
       : "http://localhost:5000/api/auth/login";
-
+  
     try {
+      // -------- OTP-aware payload --------
+      const payload = !isSignup
+        ? otpStep
+          ? { email: formData.email, password: formData.password, otp }
+          : { email: formData.email, password: formData.password }
+        : formData;
+  
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) throw new Error(data.msg || "Something went wrong");
-
+  
+      // -------- OTP step handling --------
+      if (!isSignup && data.step === "OTP_REQUIRED") {
+        setOtpStep(true);
+        return; // stop here, wait for OTP input
+      }
+  
+      // -------- Final login success --------
       if (!isSignup) {
         if (data.token) localStorage.setItem("token", data.token);
-
+  
         const role = data.role || formData.role;
         localStorage.setItem("role", role);
-
+  
         setIsOpen(false);
-
+  
         if (role === "student") navigate("/student");
         else if (role === "organizer") navigate("/organizer");
-
+  
         console.log(`Logged in as ${role}`);
-      } else {
+      } 
+      // -------- Signup success --------
+      else {
         setSuccess("Signup successful! Please log in now.");
         setIsSignup(false);
         setFormData({ ...formData, password: "" });
       }
+  
     } catch (err) {
       setError(err.message);
     }
   };
+  
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
@@ -151,6 +172,23 @@ function AuthModal({ isOpen, setIsOpen }) {
               required
             />
           </div>
+
+          {!isSignup && otpStep && (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      OTP
+    </label>
+    <input
+      type="text"
+      placeholder="Enter OTP"
+      value={otp}
+      onChange={(e) => setOtp(e.target.value)}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg text-black"
+      required
+    />
+  </div>
+)}
+
 
           <button
             type="submit"

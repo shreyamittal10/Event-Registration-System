@@ -14,6 +14,7 @@ function CreateEventPage() {
     event_time: "",
   });
   const [error, setError] = useState("");
+  const [loadingAI, setLoadingAI] = useState(false);
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -43,6 +44,40 @@ function CreateEventPage() {
     }
   };
 
+  const handleAIDescription = async (optimize = false) => {
+    setLoadingAI(true);
+    setError("");
+  
+    try {
+      const res = await fetch("http://localhost:5000/api/ai/event-description", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          venue: formData.venue,
+          event_date: formData.event_date,
+          event_time: formData.event_time,
+          description: optimize ? formData.description : "",
+        }),
+      });
+  
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.msg || "AI failed");
+  
+      setFormData((prev) => ({
+        ...prev,
+        description: data.description,
+      }));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoadingAI(false);
+    }
+  };  
+
   return (
     <div className="flex justify-center items-center h-screen bg-gray-900 text-white">
       <div className="bg-gray-800 p-8 rounded-xl w-full max-w-lg shadow-lg">
@@ -62,17 +97,40 @@ function CreateEventPage() {
               required
             />
           </div>
+          
+<div>
+  <label className="block mb-1">Description</label>
 
-          <div>
-            <label className="block mb-1">Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded bg-gray-700 text-white"
-              required
-            />
-          </div>
+  <textarea
+    name="description"
+    value={formData.description}
+    onChange={handleChange}
+    className="w-full px-4 py-2 rounded bg-gray-700 text-white"
+    rows={5}
+    required
+  />
+
+  <div className="flex gap-2 mt-2">
+    <button
+      type="button"
+      disabled={loadingAI}
+      onClick={() => handleAIDescription(false)}
+      className="px-3 py-1 bg-indigo-600 rounded text-sm hover:bg-indigo-700"
+    >
+      {loadingAI ? "Generating..." : "✨ Generate with AI"}
+    </button>
+
+    <button
+      type="button"
+      disabled={loadingAI || !formData.description}
+      onClick={() => handleAIDescription(true)}
+      className="px-3 py-1 bg-purple-600 rounded text-sm hover:bg-purple-700"
+    >
+      🔧 Optimize
+    </button>
+  </div>
+</div>
+
 
           <div>
             <label className="block mb-1">Image URL</label>
