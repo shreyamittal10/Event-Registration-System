@@ -59,7 +59,9 @@ export const login = async (req, res) => {
         [user.id, generatedOTP, expiresAt]
       );
 
-      await sendOTPEmail(user.email, generatedOTP);
+      // await sendOTPEmail(user.email, generatedOTP);
+    
+        console.log("OTP for", user.email, "is:", generatedOTP);
 
       return res.json({ msg: "OTP sent to email", step: "OTP_REQUIRED" });
     }
