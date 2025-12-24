@@ -9,7 +9,7 @@ export default function ChatWindow({ eventId, otherUserId, otherName, onClose, c
   const bottomRef = useRef();
 
   useEffect(() => {
-    const s = io("http://localhost:5000", { auth: { token } });
+    const s = io("https://event-system-backend-cbcg.onrender.com", { auth: { token } });
     setSocket(s);
 
     s.on("connect", () => {
@@ -39,7 +39,7 @@ export default function ChatWindow({ eventId, otherUserId, otherName, onClose, c
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/chats/${eventId}/messages?withUser=${otherUserId}`, {
+        const res = await fetch(`https://event-system-backend-cbcg.onrender.com/api/chats/${eventId}/messages?withUser=${otherUserId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
