@@ -23,7 +23,7 @@ const organizerId = token ? JSON.parse(atob(token.split(".")[1])).id : null;
 
   const fetchEventDetails = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/events/${id}`, {
+      const res = await fetch(`https://event-system-backend-cbcg.onrender.com/api/events/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -45,7 +45,7 @@ const organizerId = token ? JSON.parse(atob(token.split(".")[1])).id : null;
     if (!window.confirm("Are you sure? This will permanently delete the event.")) return;
     setLoadingDelete(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/events/${id}`, {
+      const res = await fetch(`https://event-system-backend-cbcg.onrender.com/api/events/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
