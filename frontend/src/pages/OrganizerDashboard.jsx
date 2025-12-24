@@ -17,7 +17,7 @@ function OrganizerDashboard() {
 
   const fetchCreatedEvents = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/events/created", {
+      const res = await fetch("https://event-system-backend-cbcg.onrender.com/api/events/created", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -32,7 +32,7 @@ function OrganizerDashboard() {
 
   const fetchAllEvents = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/events/all", {
+      const res = await fetch("https://event-system-backend-cbcg.onrender.com/api/events/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
