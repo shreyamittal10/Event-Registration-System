@@ -29,7 +29,7 @@ const { Pool } = pkg;
 const app = express();
 
 app.use(express.json());
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+app.use(cors({ origin: "*"}));
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 pool.connect()
