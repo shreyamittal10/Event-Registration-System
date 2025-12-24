@@ -24,7 +24,7 @@ function CreateEventPage() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/events/create", {
+      const res = await fetch("https://event-system-backend-cbcg.onrender.com/api/events/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -49,7 +49,7 @@ function CreateEventPage() {
     setError("");
   
     try {
-      const res = await fetch("http://localhost:5000/api/ai/event-description", {
+      const res = await fetch("https://event-system-backend-cbcg.onrender.com/api/ai/event-description", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
