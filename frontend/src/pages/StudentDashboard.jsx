@@ -22,7 +22,7 @@ function StudentDashboard() {
 
   const fetchAllEvents = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/events/all", {
+      const res = await fetch("https://event-system-backend-cbcg.onrender.com/api/events/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -37,7 +37,7 @@ function StudentDashboard() {
 
   const fetchRegisteredEvents = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/events/registered", {
+      const res = await fetch("https://event-system-backend-cbcg.onrender.com/api/events/registered", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -75,7 +75,7 @@ function StudentDashboard() {
 
   const fetchStudentInfo = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/users/me", {
+      const res = await fetch("https://event-system-backend-cbcg.onrender.com/api/users/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -89,7 +89,7 @@ function StudentDashboard() {
 
   const handleRegister = async (eventId) => {
     try {
-      const res = await fetch("http://localhost:5000/api/events/register", {
+      const res = await fetch("https://event-system-backend-cbcg.onrender.com/api/events/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,7 +109,7 @@ function StudentDashboard() {
 
   const downloadTicket = async (eventId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/events/${eventId}/ticket`, {
+      const res = await fetch(`https://event-system-backend-cbcg.onrender.com/api/events/${eventId}/ticket`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
