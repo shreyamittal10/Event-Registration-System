@@ -32,8 +32,8 @@ function AuthModal({ isOpen, setIsOpen }) {
     setSuccess("");
   
     const url = isSignup
-      ? "http://localhost:5000/api/auth/register"
-      : "http://localhost:5000/api/auth/login";
+      ? "https://event-system-backend-cbcg.onrender.com/api/auth/register"
+      : "https://event-system-backend-cbcg.onrender.com/api/auth/login";
   
     try {
       const payload = !isSignup
