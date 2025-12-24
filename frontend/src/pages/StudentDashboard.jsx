@@ -10,8 +10,6 @@ function StudentDashboard() {
   const [registeredEvents, setRegisteredEvents] = useState([]);
   const [activeTab, setActiveTab] = useState("home");
   const [student, setStudent] = useState(null);
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [activeChat, setActiveChat] = useState(null);
 
   const token = localStorage.getItem("token");
@@ -20,7 +18,6 @@ function StudentDashboard() {
     fetchAllEvents();
     fetchRegisteredEvents();
     fetchStudentInfo();
-    fetchNotifications();
   }, []);
 
   const fetchAllEvents = async () => {
@@ -90,22 +87,6 @@ function StudentDashboard() {
     }
   };
 
-  const fetchNotifications = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/notifications", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.msg || "Failed to fetch notifications");
-
-      setNotifications(data.notifications || []);
-      setUnreadCount((data.notifications || []).filter(n => !n.is_read).length);
-    } catch (err) {
-      console.error("Error fetching notifications:", err);
-    }
-  };
-
   const handleRegister = async (eventId) => {
     try {
       const res = await fetch("http://localhost:5000/api/events/register", {
@@ -120,7 +101,6 @@ function StudentDashboard() {
       if (!res.ok) throw new Error(data.msg || "Failed to register");
       alert("Registered successfully!");
       fetchRegisteredEvents();
-      if (fetchNotifications) fetchNotifications();
     } catch (err) {
       console.error(err);
       alert("Error: " + err.message);
@@ -173,11 +153,7 @@ function StudentDashboard() {
       <div className="w-64 bg-gray-800 flex flex-col justify-between p-6">
         <div className="flex flex-col gap-6">
           <h2 className="text-2xl font-bold mb-4">Student</h2>
-          <NotificationBell
-            notifications={notifications}
-            unreadCount={unreadCount}
-            fetchNotifications={fetchNotifications}
-          />
+          <NotificationBell/>
           <button
             onClick={() => setActiveTab("home")}
             className="hover:text-blue-400 transition"

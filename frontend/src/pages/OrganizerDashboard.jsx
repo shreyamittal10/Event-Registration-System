@@ -7,9 +7,6 @@ function OrganizerDashboard() {
   const [search, setSearch] = useState("");
   const [createdEvents, setCreatedEvents] = useState([]);
   const [allEvents, setAllEvents] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-
 
   const token = localStorage.getItem("token");
 
