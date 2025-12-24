@@ -8,7 +8,7 @@ function NotificationBell() {
 
   const fetchNotifications = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/notifications", {
+      const res = await fetch("https://event-system-backend-cbcg.onrender.com/api/notifications", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -20,7 +20,7 @@ function NotificationBell() {
 
   const markAsRead = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/notifications/read/${id}`, {
+      await fetch(`https://event-system-backend-cbcg.onrender.com/api/notifications/read/${id}`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` },
       });
