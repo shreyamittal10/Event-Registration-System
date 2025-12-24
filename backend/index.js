@@ -29,7 +29,11 @@ const { Pool } = pkg;
 const app = express();
 
 app.use(express.json());
-app.use(cors({ origin: "*"}));
+app.use(cors({ origin: [
+    "http://localhost:5173",
+    "https://event-system-frontend-dhp0.onrender.com"
+  ],
+  credentials: true}));
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 pool.connect()
@@ -66,7 +70,7 @@ app.put("/api/notifications/read/:id", verifyToken, markAsRead);
 const server = http.createServer(app);
 
 const io = new IOServer(server, {
-  cors: { origin: "http://localhost:5173", credentials: true },
+  cors: { origin: ["http://localhost:5173", "https://event-system-frontend-dhp0.onrender.com"], methods: ["GET", "POST"], credentials: true },
 });
 
 io.use((socket, next) => {
